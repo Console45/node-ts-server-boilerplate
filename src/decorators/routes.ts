@@ -8,7 +8,11 @@ export interface RouteHandlerDescriptor extends PropertyDescriptor {
 
 const routeBinder = (method: string) => {
   return function (path: string) {
-    return function (target: any, key: string, desc: RouteHandlerDescriptor) {
+    return function (
+      target: Object,
+      key: string,
+      desc: RouteHandlerDescriptor
+    ) {
       Reflect.defineMetadata(MetadataKeys.METHOD, method, target, key);
       Reflect.defineMetadata(MetadataKeys.PATH, path, target, key);
     };

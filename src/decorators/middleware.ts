@@ -4,7 +4,7 @@ import { RequestHandler } from "express";
 import { MetadataKeys } from "src/constants/constant";
 
 export function use(middleware: RequestHandler) {
-  return function (target: any, key: string, desc: RouteHandlerDescriptor) {
+  return function (target: Object, key: string, desc: RouteHandlerDescriptor) {
     const middlewares =
       Reflect.getMetadata(MetadataKeys.MIDDLEWARE, target, key) || [];
 
