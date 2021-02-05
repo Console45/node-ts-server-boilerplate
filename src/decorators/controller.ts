@@ -1,6 +1,6 @@
 import "reflect-metadata";
-import { MetadataKeys, Methods } from "src/constants/constant";
-import { AppRouter } from "src/utils/app-router";
+import { MetadataKeys, Methods } from "../constants/constant";
+import { AppRouter } from "../utils/app-router";
 
 const getMetadata = (
   metadataKey: MetadataKeys,

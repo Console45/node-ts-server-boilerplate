@@ -1,6 +1,6 @@
 import "reflect-metadata";
 import { RequestHandler } from "express";
-import { MetadataKeys, Methods } from "src/constants/constant";
+import { MetadataKeys, Methods } from "../constants/constant";
 
 export interface RouteHandlerDescriptor extends PropertyDescriptor {
   value?: RequestHandler;
