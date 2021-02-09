@@ -42,7 +42,7 @@ switch (process.env.NODE_ENV) {
   case "development":
     keys = devKeys;
     break;
-  case "prodKeys":
+  case "production":
     keys = prodKeys;
   case "ci":
     keys = ciKeys;
