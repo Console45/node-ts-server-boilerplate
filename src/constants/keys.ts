@@ -6,7 +6,7 @@ interface Keys {
   RESET_PASSWORD_TOKEN_SECRET: string;
 }
 
-const defaults: Keys = {
+const defaults: Omit<Keys, "MONGODB_URI"> = {
   PORT: process.env.PORT! || 4000,
   JWT_ACCESS_TOKEN_SECRET:
     "ahguidgishgifsuhdagifahisgdiybwqbytvqxyxbubtcgquybqsjf9jiqfjswhfuahxivuvsbaugisadububgbsagbvudbubsa",
@@ -14,23 +14,26 @@ const defaults: Keys = {
     "sagignasidgnignsigjfnasdisaidvninacoxinaismovcncsacivisandvosaidnxvixnagdsvnsadnvianingvisandginas",
   RESET_PASSWORD_TOKEN_SECRET:
     "siadfoaufnaivnscoagdmvsnxagsfagfmacxcbucnfbvgfsdcsvdkgsofgiwirtjredsorifdsgnfsgdinfgdsomfshoicn",
-  MONGODB_URI: "[MONGODB_URI]",
 };
 
 const devKeys: Keys = {
   ...defaults,
+  MONGODB_URI: "",
 };
 
 const testKeys: Keys = {
   ...defaults,
+  MONGODB_URI: "",
 };
 
 const prodKeys: Keys = {
   ...defaults,
+  MONGODB_URI: "",
 };
 
 const ciKeys: Keys = {
   ...defaults,
+  MONGODB_URI: "",
 };
 
 let keys: Keys;
