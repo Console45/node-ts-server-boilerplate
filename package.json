@@ -40,7 +40,8 @@
     "dev:run": "env-cmd -f ./config/.env nodemon ./dist/server.js",
     "dev":"run-p dev:*",
     "start:dev": "run-s clean dev",
-    "test": "env-cmd -f ./config/test.env jest",
+    "test": "jest",
+    "test:watch":"jest --watchAll",
     "start": "node ./dist/server.js",
     "build": "tsc"
   }
