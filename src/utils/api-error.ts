@@ -1,4 +1,10 @@
-import { NextFunction, Request, Response } from "express";
+import {
+  NextFunction,
+  Request,
+  Response,
+  ErrorRequestHandler,
+  Send,
+} from "express";
 
 enum HttpErrorCodes {
   BAD_REQUEST = 400,
@@ -117,7 +123,7 @@ export class UnAuthorizedRequest extends ApiError {
  * @param {NextFunction} __ express next function
  * @returns error response from server
  */
-export const apiErrorHandler = (
+export const apiErrorHandler: ErrorRequestHandler = (
   err: Error,
   _: Request,
   res: Response,
