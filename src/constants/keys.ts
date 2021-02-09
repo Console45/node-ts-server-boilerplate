@@ -33,7 +33,7 @@ const prodKeys: Keys = {
 
 const ciKeys: Keys = {
   ...defaults,
-  MONGODB_URI: "",
+  MONGODB_URI: "mongodb://127.0.0.1:27017/ci_database",
 };
 
 let keys: Keys;
