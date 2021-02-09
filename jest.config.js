@@ -5,16 +5,16 @@
 
 module.exports = {
   // All imported modules in your tests should be mocked automatically
-  // automock: false,
+  automock: false,
 
   // Stop running tests after `n` failures
-  // bail: 0,
+  bail: 0,
 
   // The directory where Jest should store its cached dependency information
-  // cacheDirectory: "C:\\Users\\Cosmos\\AppData\\Local\\Temp\\jest",
+  cacheDirectory: "C:\\Users\\Cosmos\\AppData\\Local\\Temp\\jest",
 
   // Automatically clear mock calls and instances between every test
-  // clearMocks: false,
+  clearMocks: false,
 
   // Indicates whether the coverage information should be collected while executing the test
   // collectCoverage: false,
@@ -41,12 +41,15 @@ module.exports = {
 
   // An object that configures minimum threshold enforcement for coverage results
   // coverageThreshold: undefined,
-
+  displayName: {
+    name: "SERVER",
+    color: "blue",
+  },
   // A path to a custom dependency extractor
   // dependencyExtractor: undefined,
 
   // Make calling deprecated APIs throw helpful error messages
-  // errorOnDeprecated: false,
+  errorOnDeprecated: false,
 
   // Force coverage collection from ignored files using an array of glob patterns
   // forceCoverageMatch: [],
@@ -64,9 +67,7 @@ module.exports = {
   // maxWorkers: "50%",
 
   // An array of directory names to be searched recursively up from the requiring module's location
-  // moduleDirectories: [
-  //   "node_modules"
-  // ],
+  moduleDirectories: ["node_modules"],
 
   // An array of file extensions your modules use
   // moduleFileExtensions: [
@@ -148,9 +149,9 @@ module.exports = {
   // ],
 
   // An array of regexp pattern strings that are matched against all test paths, matched tests are skipped
-  // testPathIgnorePatterns: [
-  //   "\\\\node_modules\\\\"
-  // ],
+  testPathIgnorePatterns: ["\\\\node_modules\\\\"],
+
+  testTimeout: 30000,
 
   // The regexp pattern or array of patterns that Jest uses to detect test files
   // testRegex: [],
