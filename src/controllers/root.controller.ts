@@ -8,6 +8,7 @@ class RootController {
     res.json({
       message: "node ts boilerplate code",
       status: "success",
+      data: null,
     });
   }
 }
