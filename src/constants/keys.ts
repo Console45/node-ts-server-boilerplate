@@ -44,8 +44,10 @@ switch (process.env.NODE_ENV) {
     break;
   case "production":
     keys = prodKeys;
+    break;
   case "ci":
     keys = ciKeys;
+    break;
   default:
     keys = testKeys;
     break;
