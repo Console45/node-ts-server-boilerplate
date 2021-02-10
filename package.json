@@ -1,6 +1,6 @@
 {
   "name": "node-ts-boilerplate",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "description": "node typescript boilerplate",
   "main": "server.ts",
   "author": "Cosmos Appiah <cosmosappiah029@gmail.com>",
