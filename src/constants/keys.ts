@@ -18,17 +18,17 @@ const defaults: Omit<Keys, "MONGODB_URI"> = {
 
 const devKeys: Keys = {
   ...defaults,
-  MONGODB_URI: "",
+  MONGODB_URI: process.env.MONGODB_URI!,
 };
 
 const testKeys: Keys = {
   ...defaults,
-  MONGODB_URI: "",
+  MONGODB_URI: process.env.MONGODB_URI!,
 };
 
 const prodKeys: Keys = {
   ...defaults,
-  MONGODB_URI: "",
+  MONGODB_URI: process.env.MONGODB_URI!,
 };
 
 const ciKeys: Keys = {
