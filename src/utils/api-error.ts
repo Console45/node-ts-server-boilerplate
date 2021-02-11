@@ -29,7 +29,7 @@ export default class ApiError {
    * @param {string} message error message
    * @param {any} data error data
    */
-  constructor(code: HttpErrorCodes, message: string, data: any) {
+  constructor(code: HttpErrorCodes, message: string, data?: any) {
     this.code = code;
     this.message = message;
     this.data = data;
@@ -47,7 +47,7 @@ export class BadRequest extends ApiError {
    * @param {string} message error message
    * @param {any} data error data
    */
-  constructor(message: string, data: any) {
+  constructor(message: string, data?: any) {
     super(HttpErrorCodes.BAD_REQUEST, message, data);
   }
 }
@@ -63,7 +63,7 @@ export class InternalServerError extends ApiError {
    * @param {string} message error message
    * @param {any} data error data
    */
-  constructor(message: string, data: any) {
+  constructor(message: string, data?: any) {
     super(HttpErrorCodes.INTERNAL_SERVER, message, data);
   }
 }
@@ -79,7 +79,7 @@ export class ForbiddenRequest extends ApiError {
    * @param {string} message error message
    * @param {any} data error data
    */
-  constructor(message: string, data: any) {
+  constructor(message: string, data?: any) {
     super(HttpErrorCodes.FORBIDDEN, message, data);
   }
 }
@@ -95,7 +95,7 @@ export class NotFoundError extends ApiError {
    * @param {string} message error message
    * @param {any} data error data
    */
-  constructor(message: string, data: any) {
+  constructor(message: string, data?: any) {
     super(HttpErrorCodes.NOT_FOUND, message, data);
   }
 }
@@ -111,7 +111,7 @@ export class UnAuthorizedRequest extends ApiError {
    * @param {string} message error message
    * @param {any} data error data
    */
-  constructor(message: string, data: any) {
+  constructor(message: string, data?: any) {
     super(HttpErrorCodes.UNAUTHORIZED, message, data);
   }
 }
