@@ -1,5 +1,5 @@
 import { connect, disconnect, connection } from "mongoose";
-import keys from "src/constants/keys";
+import keys from "../constants/keys";
 
 type Connection = () => Promise<void>;
 type Disconnection = () => Promise<void>;
