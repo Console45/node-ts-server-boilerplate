@@ -133,13 +133,13 @@ userSchema.virtual("orders", {
 });
 
 userSchema.methods.toJSON = function (this: IUser): any {
-  const userObject = this.toObject();
-  delete userObject["__v"];
-  delete userObject.password;
-  delete userObject.refreshTokenVersion;
-  delete userObject.resetPasswordTokenVersion;
-  delete userObject.accessTokens;
-  return userObject;
+  const clone: any = { ...this.toObject() };
+  delete clone.__v;
+  delete clone.password;
+  delete clone.refreshTokenVersion;
+  delete clone.resetPasswordTokenVersion;
+  delete clone.accessTokens;
+  return clone;
 };
 
 /**
