@@ -1,10 +1,4 @@
-import {
-  NextFunction,
-  Request,
-  Response,
-  ErrorRequestHandler,
-  Send,
-} from "express";
+import { NextFunction, Request, Response, ErrorRequestHandler } from "express";
 
 enum HttpErrorCodes {
   BAD_REQUEST = 400,
@@ -29,7 +23,7 @@ export default class ApiError {
    * @param {string} message error message
    * @param {any} data error data
    */
-  constructor(code: HttpErrorCodes, message: string, data?: any) {
+  constructor(code: HttpErrorCodes, message: string, data: any = null) {
     this.code = code;
     this.message = message;
     this.data = data;
@@ -47,7 +41,7 @@ export class BadRequest extends ApiError {
    * @param {string} message error message
    * @param {any} data error data
    */
-  constructor(message: string, data?: any) {
+  constructor(message: string, data: any = null) {
     super(HttpErrorCodes.BAD_REQUEST, message, data);
   }
 }
@@ -63,7 +57,7 @@ export class InternalServerError extends ApiError {
    * @param {string} message error message
    * @param {any} data error data
    */
-  constructor(message: string, data?: any) {
+  constructor(message: string, data: any = null) {
     super(HttpErrorCodes.INTERNAL_SERVER, message, data);
   }
 }
@@ -79,7 +73,7 @@ export class ForbiddenRequest extends ApiError {
    * @param {string} message error message
    * @param {any} data error data
    */
-  constructor(message: string, data?: any) {
+  constructor(message: string, data: any = null) {
     super(HttpErrorCodes.FORBIDDEN, message, data);
   }
 }
@@ -95,7 +89,7 @@ export class NotFoundError extends ApiError {
    * @param {string} message error message
    * @param {any} data error data
    */
-  constructor(message: string, data?: any) {
+  constructor(message: string, data: any = null) {
     super(HttpErrorCodes.NOT_FOUND, message, data);
   }
 }
@@ -111,7 +105,7 @@ export class UnAuthorizedRequest extends ApiError {
    * @param {string} message error message
    * @param {any} data error data
    */
-  constructor(message: string, data?: any) {
+  constructor(message: string, data: any = null) {
     super(HttpErrorCodes.UNAUTHORIZED, message, data);
   }
 }
