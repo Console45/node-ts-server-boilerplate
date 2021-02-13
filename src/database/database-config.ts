@@ -8,18 +8,26 @@ type Disconnection = () => Promise<void>;
  * A function that creates a connection to the database
  */
 export const connectDatabase: Connection = async () => {
-  await connect(keys.MONGODB_URI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-    useCreateIndex: true,
-    useFindAndModify: false,
-  });
+  try {
+    await connect(keys.MONGODB_URI, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+      useCreateIndex: true,
+      useFindAndModify: false,
+    });
+  } catch (err) {
+    console.log(err.message);
+  }
 };
 
 /**
  * A function that closes a database connection and drops the database
  */
 export const closeDatabase: Disconnection = async () => {
-  await connection.dropDatabase();
-  await disconnect();
+  try {
+    await connection.dropDatabase();
+    await disconnect();
+  } catch (err) {
+    console.log(err.message);
+  }
 };
