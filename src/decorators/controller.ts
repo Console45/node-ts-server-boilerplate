@@ -23,7 +23,6 @@ export function controller(prefix: string) {
       );
       const middlewares =
         getMetadata(MetadataKeys.MIDDLEWARE, constructor.prototype, key) || [];
-
       if (path) router[method](`${prefix}${path}`, ...middlewares, handler);
     }
   };
