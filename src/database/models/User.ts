@@ -1,9 +1,11 @@
+import { Container, Token as DIToken } from "typedi";
 import { Schema, Document, model, HookNextFunction, Model } from "mongoose";
 import validator from "validator";
 import rug from "random-username-generator";
 import { compare, hash } from "bcrypt";
 import { sign } from "jsonwebtoken";
 import { NotFoundError, UnAuthorizedRequest } from "../../utils/api-error";
+import keys from "../../constants/keys";
 
 interface Tokens {
   token: string;
@@ -198,7 +200,7 @@ userSchema.methods.createAccessToken = async function (
 ): Promise<AccessToken> {
   const accessToken: string = sign(
     { userId: this._id.toString() },
-    process.env.JWT_ACCESS_TOKEN_SECRET!,
+    keys.JWT_ACCESS_TOKEN_SECRET,
     { expiresIn: "15m" }
   );
   const expTime = generateFutureTime(15);
@@ -210,7 +212,7 @@ userSchema.methods.createAccessToken = async function (
 userSchema.methods.createRefreshToken = function (this: IUser): string {
   const refreshToken: string = sign(
     { userId: this._id.toString(), tokenVersion: this.refreshTokenVersion },
-    process.env.JWT_REFRESH_TOKEN_SECRET!,
+    keys.JWT_REFRESH_TOKEN_SECRET,
     { expiresIn: "7d" }
   );
   return refreshToken;
@@ -224,7 +226,7 @@ userSchema.methods.createResetPasswordToken = function (
       userId: this._id.toString(),
       tokenVersion: this.resetPasswordTokenVersion,
     },
-    process.env.RESET_PASSWORD_TOKEN_SECRET!,
+    keys.RESET_PASSWORD_TOKEN_SECRET,
     { expiresIn: "30m" }
   );
   const expTime = generateFutureTime(30);
@@ -260,5 +262,8 @@ userSchema.pre<IUser>(
 );
 
 const User = model<IUser, IUserModel>("User", userSchema);
+
+export const USER_MODEL_TOKEN = new DIToken<IUserModel>("MY_SECRET");
+Container.set(USER_MODEL_TOKEN, User);
 
 export default User;
