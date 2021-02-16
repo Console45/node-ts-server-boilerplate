@@ -1,4 +1,3 @@
-import "reflect-metadata";
 import { RequestHandler } from "express";
 import { MetadataKeys, Methods } from "../constants/constant";
 

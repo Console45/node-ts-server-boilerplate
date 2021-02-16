@@ -1,4 +1,3 @@
-import "reflect-metadata";
 import { MetadataKeys, Methods } from "../constants/constant";
 import { AppRouter } from "../utils/app-router";
 

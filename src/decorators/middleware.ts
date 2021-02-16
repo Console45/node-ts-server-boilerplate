@@ -1,4 +1,3 @@
-import "reflect-metadata";
 import { RouteHandlerDescriptor } from "./routes";
 import { RequestHandler } from "express";
 import { MetadataKeys } from "../constants/constant";
