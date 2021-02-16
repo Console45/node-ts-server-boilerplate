@@ -1,27 +1,26 @@
-import User, { AccessToken, IUser } from "./../database/models/User";
-import { sendRefreshToken } from "./../utils/send-refresh-toke";
 import { Request, Response, NextFunction } from "express";
 import { controller, post } from "../decorators";
-import ApiError from "../utils/api-error";
+import { authServiceInstance } from "../services/auth";
 
 @controller("/auth")
 class AuthController {
-  @post("/login")
-  async postLogin({ body }: Request, res: Response, next: NextFunction) {
+  @post("/register")
+  async postRegister({ body }: Request, res: Response, next: NextFunction) {
+    authServiceInstance.res = res;
     try {
-      const user: IUser = new User(body);
-      await user.save();
-      sendRefreshToken(res, user.createRefreshToken());
-      const accessToken: AccessToken = await user.createAccessToken();
+      const { user, accessToken } = await authServiceInstance.registerUser(
+        body
+      );
       res.status(201).json({
         status: "success",
-        user,
-        token: accessToken,
+        message: `${user.role} registration is successful.`,
+        data: {
+          user,
+          accessToken,
+        },
       });
     } catch (err) {
-      if (err.name === "MongoError" && err.code === 11000)
-        next(new ApiError(409, "Email already exists."));
-      else next(err);
+      next(err);
     }
   }
 }
