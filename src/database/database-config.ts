@@ -5,7 +5,7 @@ type Connection = () => Promise<void>;
 type Disconnection = () => Promise<void>;
 
 /**
- * A function that creates a connection to the database
+ * Creates a connection to the database
  */
 export const connectDatabase: Connection = async () => {
   try {
@@ -21,7 +21,7 @@ export const connectDatabase: Connection = async () => {
 };
 
 /**
- * A function that closes a database connection and drops the database
+ * Closes a database connection and drops the database
  */
 export const closeDatabase: Disconnection = async () => {
   try {
