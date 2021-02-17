@@ -1,3 +1,4 @@
+import { validationFunction } from "./../validators/validationFunction";
 import { MetadataKeys, Methods } from "../constants/constant";
 import { AppRouter } from "../utils/app-router";
 
@@ -22,7 +23,18 @@ export function controller(prefix: string) {
       );
       const middlewares =
         getMetadata(MetadataKeys.MIDDLEWARE, constructor.prototype, key) || [];
-      if (path) router[method](`${prefix}${path}`, ...middlewares, handler);
+      const validator = getMetadata(
+        MetadataKeys.VALIDATOR,
+        constructor.prototype,
+        key
+      );
+      if (path)
+        router[method](
+          `${prefix}${path}`,
+          ...middlewares,
+          validationFunction(validator),
+          handler
+        );
     }
   };
 }
