@@ -11,7 +11,7 @@ export interface Validator {
 export const validationFunction = (validators: Validator[]): RequestHandler => {
   return async function (req: Request, _: Response, next: NextFunction) {
     try {
-      if (validators.length === 0) {
+      if (!Array.isArray(validators)) {
         next();
         return;
       }
