@@ -158,9 +158,9 @@ userSchema.statics.findByCredentials = async (
   password: string
 ) => {
   const user: IUser | null = await User.findOne({ email });
-  if (!user) throw new NotFoundError("Account doesnt exist.");
+  if (!user) throw new NotFoundError("account doesnt exist.");
   const isMatch = await compare(password, user.password);
-  if (!isMatch) throw new UnAuthorizedRequest("Invalid credentials.");
+  if (!isMatch) throw new UnAuthorizedRequest("invalid credentials.");
   return user;
 };
 
