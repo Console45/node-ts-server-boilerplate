@@ -7,7 +7,7 @@ import {
   AccessToken,
   USER_MODEL_TOKEN,
 } from "../database/models/User";
-import ApiError from "../utils/api-error";
+import ApiError, { UnAuthorizedRequest } from "../utils/api-error";
 import { sendRefreshToken } from "../utils/app-utils";
 
 interface UserAndToken {
@@ -32,6 +32,9 @@ class AuthServices {
     eventEmitter.on(Events.REGISTER_USER, ({ user }: { user: IUser }) => {
       sendRefreshToken(AuthServices._res, user.createRefreshToken());
     });
+    eventEmitter.on(Events.LOGIN_USER, ({ user }: { user: IUser }) => {
+      sendRefreshToken(AuthServices._res, user.createRefreshToken());
+    });
   }
 
   /**
@@ -51,12 +54,25 @@ class AuthServices {
       email: body.email,
     });
     if (existingUser) {
-      throw new ApiError(409, `Email ${body.email} already exists`);
+      throw new ApiError(409, `email ${body.email} already exists`);
     }
     const user: IUser = new this._userModel(body);
     await user.save();
     const accessToken: AccessToken = await user.createAccessToken();
     eventEmitter.emit(Events.REGISTER_USER, { user });
+    return { user, accessToken };
+  }
+
+  public async loginUser(body: any, params: any): Promise<UserAndToken> {
+    const user: IUser = await this._userModel.findByCredentials(
+      body.email,
+      body.password
+    );
+    if (params.role === "admin" && user.role === "User") {
+      throw new UnAuthorizedRequest("access denied.");
+    }
+    const accessToken: AccessToken = await user.createAccessToken();
+    eventEmitter.emit(Events.LOGIN_USER, { user });
     return { user, accessToken };
   }
 }
