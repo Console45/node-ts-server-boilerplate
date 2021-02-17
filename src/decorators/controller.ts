@@ -2,6 +2,13 @@ import { validationFunction } from "./../validators/validationFunction";
 import { MetadataKeys, Methods } from "../constants/constant";
 import { AppRouter } from "../utils/app-router";
 
+/**
+ * Gets an existing metadata
+ * @param {MetadataKeys} metadataKey metadata key
+ * @param {Object} target target object
+ * @param {string} propertyKey property key
+ * @return {any} metadata
+ */
 const getMetadata = (
   metadataKey: MetadataKeys,
   target: Object,
@@ -10,6 +17,11 @@ const getMetadata = (
   return Reflect.getMetadata(metadataKey, target, propertyKey);
 };
 
+/**
+ *  Controller decorator
+ * @param {string} prefix controller prefix
+ * example: /, /api
+ */
 export function controller(prefix: string) {
   return function (constructor: Function) {
     const router = AppRouter.instance;

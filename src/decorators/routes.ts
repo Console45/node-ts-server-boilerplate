@@ -5,6 +5,11 @@ export interface RouteHandlerDescriptor extends PropertyDescriptor {
   value?: RequestHandler;
 }
 
+/**
+ *  Binds a route decorator with a http method
+ * @param {string} method http method
+ * @returns Route decorator
+ */
 const routeBinder = (method: string) => {
   return function (path: string) {
     return function (target: Object, key: string, _: RouteHandlerDescriptor) {

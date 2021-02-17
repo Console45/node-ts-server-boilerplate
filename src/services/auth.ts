@@ -24,16 +24,28 @@ class AuthServices {
     this._userModel = userModel;
     this.initalizeEventsListeners();
   }
+
+  /**
+   * Initializes event listeners
+   */
   private initalizeEventsListeners(): void {
     eventEmitter.on(Events.REGISTER_USER, ({ user }: { user: IUser }) => {
       sendRefreshToken(AuthServices._res, user.createRefreshToken());
     });
   }
 
+  /**
+   * set the response object
+   */
   public set res(response: Response) {
     AuthServices._res = response;
   }
 
+  /**
+   * Registers a new user
+   * @param body express request body
+   * @returns object of user and accesstoken
+   */
   public async registerUser(body: any): Promise<UserAndToken> {
     const existingUser: IUser = await this._userModel.findOne({
       email: body.email,
