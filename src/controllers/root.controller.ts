@@ -3,10 +3,10 @@ import { controller, get } from "../decorators";
 
 @controller("")
 class RootController {
-  @get("/")
+  @get("/ping")
   getRoot(_: Request, res: Response) {
     res.json({
-      message: "node ts boilerplate code",
+      message: "health check is successful.",
       status: "success",
       data: null,
     });
