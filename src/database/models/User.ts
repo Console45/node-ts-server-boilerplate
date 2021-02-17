@@ -99,7 +99,7 @@ const userSchema: Schema<IUser> = new Schema<IUser>(
         if (!validator.isEmail(value)) throw new Error("not an email");
       },
     },
-    password: { type: String, trim: true, required: true },
+    password: { type: String, trim: true, required: true, minlength: 6 },
     role: {
       type: String,
       trim: true,
