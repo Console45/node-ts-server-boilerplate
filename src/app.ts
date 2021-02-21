@@ -1,13 +1,16 @@
 import "reflect-metadata";
-import { connectDatabase } from "./database/database-config";
-import express, { Application, json } from "express";
+import express, { Application, json, urlencoded } from "express";
+import hpp from "hpp";
+import helmet from "helmet";
+import cors from "cors";
 import compression from "compression";
+import cookieParser from "cookie-parser";
+import { connectDatabase } from "./database/database-config";
 import { apiErrorHandler } from "./utils/api-error";
 import { AppRouter } from "./utils/app-router";
-import cors from "cors";
+import { shouldCompress } from "./utils/app-utils";
 import "./controllers/root.controller";
 import "./controllers/auth.conroller";
-import { shouldCompress } from "./utils/app-utils";
 
 const app: Application = express();
 
@@ -15,8 +18,12 @@ const app: Application = express();
 connectDatabase();
 
 app.use(cors());
+app.use(hpp());
+app.use(helmet());
+app.use(cookieParser());
 app.use(compression({ filter: shouldCompress }));
 app.use(json());
+app.use(urlencoded({ extended: false }));
 app.use(AppRouter.instance);
 app.use(apiErrorHandler);
 
