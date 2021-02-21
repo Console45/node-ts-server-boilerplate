@@ -1,13 +1,9 @@
 import { Response } from "express";
 import { Container, Service, Inject } from "typedi";
 import { eventEmitter, Events } from "../utils/event-emitter";
-import {
-  IUserModel,
-  IUser,
-  AccessToken,
-  USER_MODEL_TOKEN,
-} from "../database/models/User";
+import { USER_MODEL_TOKEN } from "../database/models/User";
 import ApiError, { UnAuthorizedRequest } from "../utils/api-error";
+import { AccessToken, IUser, IUserModel } from "../@types/user-model";
 
 interface UserAndToken {
   user: IUser;
