@@ -8,7 +8,6 @@ import {
   USER_MODEL_TOKEN,
 } from "../database/models/User";
 import ApiError, { UnAuthorizedRequest } from "../utils/api-error";
-import { sendRefreshToken } from "../utils/app-utils";
 
 interface UserAndToken {
   user: IUser;
@@ -29,12 +28,8 @@ class AuthServices {
    * Initializes event listeners
    */
   private initalizeEventsListeners(): void {
-    eventEmitter.on(Events.REGISTER_USER, ({ user }: { user: IUser }) => {
-      sendRefreshToken(AuthServices._res, user.createRefreshToken());
-    });
-    eventEmitter.on(Events.LOGIN_USER, ({ user }: { user: IUser }) => {
-      sendRefreshToken(AuthServices._res, user.createRefreshToken());
-    });
+    this.sendRefeshTokenEventListener(Events.REGISTER_USER);
+    this.sendRefeshTokenEventListener(Events.LOGIN_USER);
   }
 
   /**
@@ -46,7 +41,7 @@ class AuthServices {
 
   /**
    * Registers a new user
-   * @param body express request body
+   * @param body user data
    * @returns object of user and accesstoken
    */
   public async registerUser(body: any): Promise<UserAndToken> {
@@ -62,7 +57,11 @@ class AuthServices {
     eventEmitter.emit(Events.REGISTER_USER, { user });
     return { user, accessToken };
   }
-
+  /**
+   *
+   * @param body user data
+   * @param params route params
+   */
   public async loginUser(body: any, params: any): Promise<UserAndToken> {
     const user: IUser = await this._userModel.findByCredentials(
       body.email,
@@ -74,6 +73,15 @@ class AuthServices {
     const accessToken: AccessToken = await user.createAccessToken();
     eventEmitter.emit(Events.LOGIN_USER, { user });
     return { user, accessToken };
+  }
+
+  private sendRefeshTokenEventListener(event: string) {
+    eventEmitter.on(event, ({ user }: { user: IUser }) => {
+      AuthServices._res.cookie("jid", user.createRefreshToken(), {
+        httpOnly: true,
+        path: "/auth/refresh_token",
+      });
+    });
   }
 }
 
