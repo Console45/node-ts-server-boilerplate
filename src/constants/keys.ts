@@ -1,33 +1,16 @@
 interface Keys {
   PORT: string | number;
   MONGODB_URI: string;
-  JWT_ACCESS_TOKEN_SECRET: string;
-  JWT_REFRESH_TOKEN_SECRET: string;
-  RESET_PASSWORD_TOKEN_SECRET: string;
+  JWT_ACCESS_TOKEN_SECRET?: string;
+  JWT_REFRESH_TOKEN_SECRET?: string;
+  RESET_PASSWORD_TOKEN_SECRET?: string;
 }
 
-const defaults: Omit<Keys, "MONGODB_URI"> = {
+const defaults: Keys = {
   PORT: process.env.PORT! || 4000,
-  JWT_ACCESS_TOKEN_SECRET:
-    "ahguidgishgifsuhdagifahisgdiybwqbytvqxyxbubtcgquybqsjf9jiqfjswhfuahxivuvsbaugisadububgbsagbvudbubsa",
-  JWT_REFRESH_TOKEN_SECRET:
-    "sagignasidgnignsigjfnasdisaidvninacoxinaismovcncsacivisandvosaidnxvixnagdsvnsadnvianingvisandginas",
-  RESET_PASSWORD_TOKEN_SECRET:
-    "siadfoaufnaivnscoagdmvsnxagsfagfmacxcbucnfbvgfsdcsvdkgsofgiwirtjredsorifdsgnfsgdinfgdsomfshoicn",
-};
-
-const devKeys: Keys = {
-  ...defaults,
-  MONGODB_URI: process.env.MONGODB_URI!,
-};
-
-const testKeys: Keys = {
-  ...defaults,
-  MONGODB_URI: process.env.MONGODB_URI!,
-};
-
-const prodKeys: Keys = {
-  ...defaults,
+  JWT_ACCESS_TOKEN_SECRET: process.env.JWT_ACCESS_TOKEN_SECRET,
+  JWT_REFRESH_TOKEN_SECRET: process.env.JWT_REFRESH_TOKEN_SECRET,
+  RESET_PASSWORD_TOKEN_SECRET: process.env.RESET_PASSWORD_TOKEN_SECRET,
   MONGODB_URI: process.env.MONGODB_URI!,
 };
 
@@ -36,20 +19,16 @@ const ciKeys: Keys = {
   MONGODB_URI: "mongodb://127.0.0.1:27017/ci_database",
 };
 
-let keys: Keys;
+let keys: Keys = {
+  ...defaults,
+};
 
 switch (process.env.NODE_ENV) {
-  case "development":
-    keys = devKeys;
-    break;
-  case "production":
-    keys = prodKeys;
-    break;
   case "ci":
     keys = ciKeys;
     break;
   default:
-    keys = testKeys;
+    keys;
     break;
 }
 
