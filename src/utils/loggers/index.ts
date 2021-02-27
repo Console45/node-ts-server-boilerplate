@@ -1,5 +1,6 @@
 import path from "path";
 import fs from "fs";
+import "winston-mongodb";
 import { format, transports, Logger, createLogger } from "winston";
 import { MongoDBConnectionOptions } from "winston-mongodb";
 import keys from "../../constants/keys";
@@ -46,8 +47,6 @@ export const mongodbTransportStreamOptions = (
     db: keys.LOGS_MONGO_URI,
     options: { useUnifiedTopology: true },
     collection,
-    silent: true,
-    leaveConnectionOpen: true,
   };
 };
 

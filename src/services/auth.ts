@@ -46,17 +46,16 @@ class AuthServices {
       email: body.email,
     });
     if (existingUser) {
+      authLogger.error(`message:user already exist,email:${body.email},`);
       throw new ApiError(409, `email ${body.email} already exists`);
     }
     const user: IUser = new this._userModel(body);
     await user.save();
     const accessToken: AccessToken = await user.createAccessToken();
     eventEmitter.emit(Events.REGISTER_USER, { user });
-    authLogger.info({
-      message: `${user.role} was registered successfully`,
-      userId: user.id,
-      name: user.name,
-    });
+    authLogger.info(
+      `message:${user.role} registeration was sucessful,email:${user.email},name:${user.name}`
+    );
     return { user, accessToken };
   }
   /**
@@ -70,15 +69,16 @@ class AuthServices {
       body.password
     );
     if (params.role === "admin" && user.role === "User") {
+      authLogger.error(
+        `message:access denied,email:${user.email},userId:${user.id}`
+      );
       throw new UnAuthorizedRequest("access denied.");
     }
     const accessToken: AccessToken = await user.createAccessToken();
     eventEmitter.emit(Events.LOGIN_USER, { user });
-    authLogger.info({
-      message: `${user.role} login was successful`,
-      userId: user.id,
-      name: user.name,
-    });
+    authLogger.info(
+      `message:${user.role} login was sucessful,email:${user.email},name:${user.name}`
+    );
     return { user, accessToken };
   }
 

@@ -89,13 +89,13 @@ userSchema.statics.findByCredentials = async (
   let message: string;
   if (!user) {
     message = "account doesnt exist";
-    authLogger.error({ message, email, password });
+    authLogger.error(`message:${message},email:${email}`);
     throw new NotFoundError(message);
   }
   const isMatch = await compare(password, user.password);
   if (!isMatch) {
     message = "invalid credentials.";
-    authLogger.error({ message, email, password });
+    authLogger.error(`message:${message},email:${email}`);
     throw new UnAuthorizedRequest(message);
   }
   return user;
