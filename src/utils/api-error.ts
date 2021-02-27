@@ -1,3 +1,4 @@
+import { httpLogger } from "./loggers/http-logger";
 import { NextFunction, Request, Response, ErrorRequestHandler } from "express";
 
 enum HttpErrorCodes {
@@ -125,6 +126,10 @@ export const apiErrorHandler: ErrorRequestHandler = (
 ) => {
   // api error response
   if (err instanceof ApiError) {
+    httpLogger.error(
+      `statusCode:${err.code},message:${err.message},data:${err.data}`
+    );
+
     return res
       .status(err.code)
       .json({ message: err.message, status: "error", data: err.data });
@@ -135,13 +140,18 @@ export const apiErrorHandler: ErrorRequestHandler = (
     (err as any).status === 400 &&
     "body" in err
   ) {
+    httpLogger.error(
+      `statusCode:${HttpErrorCodes.BAD_REQUEST},message:invalid JSON payload passed,data:null`
+    );
     return res.status(HttpErrorCodes.BAD_REQUEST).json({
       message: "invalid JSON payload passed.",
       status: "error",
       data: null,
     });
   }
-
+  httpLogger.error(
+    `statusCode:${HttpErrorCodes.INTERNAL_SERVER},message:${err.message},data:null`
+  );
   res
     .status(HttpErrorCodes.INTERNAL_SERVER)
     .json({ message: err.message, status: "error", data: null });
