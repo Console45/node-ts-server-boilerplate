@@ -4,6 +4,7 @@ import { eventEmitter, Events } from "../utils/event-emitter";
 import { USER_MODEL_TOKEN } from "../database/models/User";
 import ApiError, { UnAuthorizedRequest } from "../utils/api-error";
 import { AccessToken, IUser, IUserModel } from "../@types/user-model";
+import { authLogger } from "../utils/loggers";
 
 interface UserAndToken {
   user: IUser;
@@ -41,7 +42,7 @@ class AuthServices {
    * @returns object of user and accesstoken
    */
   public async registerUser(body: any): Promise<UserAndToken> {
-    const existingUser: IUser = await this._userModel.findOne({
+    const existingUser: IUser | null = await this._userModel.findOne({
       email: body.email,
     });
     if (existingUser) {
@@ -51,6 +52,7 @@ class AuthServices {
     await user.save();
     const accessToken: AccessToken = await user.createAccessToken();
     eventEmitter.emit(Events.REGISTER_USER, { user });
+    authLogger.info("User Registration Successful");
     return { user, accessToken };
   }
   /**
@@ -68,6 +70,7 @@ class AuthServices {
     }
     const accessToken: AccessToken = await user.createAccessToken();
     eventEmitter.emit(Events.LOGIN_USER, { user });
+    authLogger.info("User Login Successful");
     return { user, accessToken };
   }
 
@@ -77,6 +80,7 @@ class AuthServices {
         httpOnly: true,
         path: "/auth/refresh_token",
       });
+      authLogger.info("Refresh Token Sent");
     });
   }
 }
