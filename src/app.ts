@@ -11,15 +11,18 @@ import { AppRouter } from "./utils/app-router";
 import { shouldCompress } from "./utils/app-utils";
 import "./controllers/root.controller";
 import "./controllers/auth.conroller";
+import morgan from "morgan";
+import { stream } from "./utils/loggers";
+import "./utils/run-error";
 
 const app: Application = express();
 
 // connect database
 connectDatabase();
-
 app.use(cors());
 app.use(hpp());
 app.use(helmet());
+app.use(morgan("combined", { stream }));
 app.use(cookieParser());
 app.use(compression({ filter: shouldCompress }));
 app.use(json());
