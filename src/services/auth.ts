@@ -4,7 +4,7 @@ import { eventEmitter, Events } from "../utils/event-emitter";
 import { USER_MODEL_TOKEN } from "../database/models/User";
 import ApiError, { UnAuthorizedRequest } from "../utils/api-error";
 import { AccessToken, IUser, IUserModel } from "../@types/user-model";
-import { authLogger } from "../utils/loggers";
+import { authLogger, httpLogger } from "../utils/loggers";
 
 interface UserAndToken {
   user: IUser;
@@ -52,7 +52,11 @@ class AuthServices {
     await user.save();
     const accessToken: AccessToken = await user.createAccessToken();
     eventEmitter.emit(Events.REGISTER_USER, { user });
-    authLogger.info("User Registration Successful");
+    authLogger.info({
+      message: `${user.role} was registered successfully`,
+      userId: user.id,
+      name: user.name,
+    });
     return { user, accessToken };
   }
   /**
@@ -70,7 +74,11 @@ class AuthServices {
     }
     const accessToken: AccessToken = await user.createAccessToken();
     eventEmitter.emit(Events.LOGIN_USER, { user });
-    authLogger.info("User Login Successful");
+    authLogger.info({
+      message: `${user.role} login was successful`,
+      userId: user.id,
+      name: user.name,
+    });
     return { user, accessToken };
   }
 
@@ -80,7 +88,7 @@ class AuthServices {
         httpOnly: true,
         path: "/auth/refresh_token",
       });
-      authLogger.info("Refresh Token Sent");
+      httpLogger.http("Refresh Token Sent");
     });
   }
 }

@@ -13,6 +13,7 @@ import {
   ResetPasswordToken,
   Role,
 } from "../../@types/user-model";
+import { authLogger } from "../../utils/loggers";
 
 const userSchema: Schema<IUser> = new Schema<IUser>(
   {
@@ -85,9 +86,18 @@ userSchema.statics.findByCredentials = async (
   password: string
 ) => {
   const user: IUser | null = await User.findOne({ email });
-  if (!user) throw new NotFoundError("account doesnt exist.");
+  let message: string;
+  if (!user) {
+    message = "account doesnt exist";
+    authLogger.error({ message, email, password });
+    throw new NotFoundError(message);
+  }
   const isMatch = await compare(password, user.password);
-  if (!isMatch) throw new UnAuthorizedRequest("invalid credentials.");
+  if (!isMatch) {
+    message = "invalid credentials.";
+    authLogger.error({ message, email, password });
+    throw new UnAuthorizedRequest(message);
+  }
   return user;
 };
 
