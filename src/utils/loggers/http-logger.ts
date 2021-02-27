@@ -1,26 +1,14 @@
-import { createLogger, transports } from "winston";
-import { consoleTransportFormat, fileTransportFormat, logsDir } from ".";
-import keys from "../../constants/keys";
+import { transports } from "winston";
+import {
+  consoleTransportStreamOptons,
+  logger,
+  mongodbTransportStreamOptions,
+} from ".";
 
-export const httpLogger = createLogger({
-  exitOnError: false,
-  transports: [
-    new transports.File({
-      level: "http",
-      dirname: logsDir,
-      filename: `http.log`,
-      format: fileTransportFormat(),
-    }),
-  ],
-});
+export const httpLogger = logger("http.log");
 
 if (process.env.NODE_ENV !== "production") {
-  httpLogger.add(
-    new transports.Console({
-      level: "http",
-      format: consoleTransportFormat(),
-    })
-  );
+  httpLogger.add(new transports.Console(consoleTransportStreamOptons()));
 }
 
 export const stream = {
@@ -31,13 +19,6 @@ export const stream = {
 
 if (process.env.NODE_ENV === "production") {
   httpLogger.add(
-    new transports.MongoDB({
-      level: "error",
-      db: keys.LOGS_MONGO_URI,
-      options: { useUnifiedTopology: true },
-      collection: "http_logs",
-      silent: true,
-      leaveConnectionOpen: true,
-    })
+    new transports.MongoDB(mongodbTransportStreamOptions("http_logs"))
   );
 }

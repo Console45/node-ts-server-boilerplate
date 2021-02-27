@@ -1,36 +1,18 @@
-import { createLogger, transports } from "winston";
-import { fileTransportFormat, consoleTransportFormat, logsDir } from ".";
-import keys from "../../constants/keys";
+import { transports } from "winston";
+import {
+  consoleTransportStreamOptons,
+  logger,
+  mongodbTransportStreamOptions,
+} from ".";
 
-export const authLogger = createLogger({
-  exitOnError: false,
-  transports: [
-    new transports.File({
-      level: "info",
-      dirname: logsDir,
-      filename: `auth.log`,
-      format: fileTransportFormat(),
-    }),
-  ],
-});
+export const authLogger = logger("auth.log");
 
 if (process.env.NODE_ENV !== "production") {
-  authLogger.add(
-    new transports.Console({
-      level: "info",
-      format: consoleTransportFormat(),
-    })
-  );
+  authLogger.add(new transports.Console(consoleTransportStreamOptons()));
 }
+
 if (process.env.NODE_ENV === "production") {
   authLogger.add(
-    new transports.MongoDB({
-      level: "error",
-      db: keys.LOGS_MONGO_URI,
-      options: { useUnifiedTopology: true },
-      collection: "auth_logs",
-      silent: true,
-      leaveConnectionOpen: true,
-    })
+    new transports.MongoDB(mongodbTransportStreamOptions("auth_logs"))
   );
 }
