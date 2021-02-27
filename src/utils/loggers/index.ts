@@ -12,10 +12,11 @@ export const logFormat = printf(
 );
 
 const fileTransportStreamOptions = (
-  filename: string
+  filename: string,
+  level: string = "info"
 ): transports.FileTransportOptions => {
   return {
-    level: "info",
+    level: level,
     dirname: logsDir,
     filename,
     format: combine(
@@ -28,9 +29,11 @@ const fileTransportStreamOptions = (
   };
 };
 
-export const consoleTransportStreamOptons = (): transports.ConsoleTransportOptions => {
+export const consoleTransportStreamOptons = (
+  level: string
+): transports.ConsoleTransportOptions => {
   return {
-    level: "info",
+    level: level,
     format: combine(splat(), colorize(), simple()),
   };
 };
@@ -48,10 +51,17 @@ export const mongodbTransportStreamOptions = (
   };
 };
 
-export const logger = (filename: string): Logger => {
+interface loggerOptions {
+  filename: string;
+  level?: string;
+}
+
+export const logger = ({ filename, level }: loggerOptions): Logger => {
   return createLogger({
     exitOnError: false,
-    transports: [new transports.File(fileTransportStreamOptions(filename))],
+    transports: [
+      new transports.File(fileTransportStreamOptions(filename, level)),
+    ],
   });
 };
 

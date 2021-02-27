@@ -5,10 +5,10 @@ import {
   mongodbTransportStreamOptions,
 } from ".";
 
-export const httpLogger = logger("http.log");
+export const httpLogger = logger({ filename: "http.log", level: "http" });
 
 if (process.env.NODE_ENV !== "production") {
-  httpLogger.add(new transports.Console(consoleTransportStreamOptons()));
+  httpLogger.add(new transports.Console(consoleTransportStreamOptons("http")));
 }
 
 export const stream = {

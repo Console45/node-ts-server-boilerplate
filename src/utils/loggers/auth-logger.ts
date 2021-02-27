@@ -5,10 +5,10 @@ import {
   mongodbTransportStreamOptions,
 } from ".";
 
-export const authLogger = logger("auth.log");
+export const authLogger = logger({ filename: "auth.log" });
 
 if (process.env.NODE_ENV !== "production") {
-  authLogger.add(new transports.Console(consoleTransportStreamOptons()));
+  authLogger.add(new transports.Console(consoleTransportStreamOptons("http")));
 }
 
 if (process.env.NODE_ENV === "production") {
