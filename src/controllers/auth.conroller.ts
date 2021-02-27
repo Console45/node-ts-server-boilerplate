@@ -1,9 +1,12 @@
-import { loginParamsSchema, loginSchema } from "./../validators/schema/auth";
 import { ValidationFields } from "./../constants/constant";
 import { Request, Response, NextFunction } from "express";
 import { controller, post, validate } from "../decorators";
 import { authServiceInstance } from "../services/auth";
-import { registerSchema } from "../validators/schema/auth";
+import {
+  registerSchema,
+  loginParamsSchema,
+  loginSchema,
+} from "../validators/schema";
 
 @controller("/auth")
 class AuthController {
@@ -20,7 +23,7 @@ class AuthController {
         message: `${user.role} registration is successful.`,
         data: {
           user,
-          accessToken,
+          token: accessToken,
         },
       });
     } catch (err) {
@@ -49,7 +52,7 @@ class AuthController {
         message: `${user.role} login is successful.`,
         data: {
           user,
-          accessToken,
+          token: accessToken,
         },
       });
     } catch (err) {
