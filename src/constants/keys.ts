@@ -5,6 +5,7 @@ interface Keys {
   JWT_ACCESS_TOKEN_SECRET: string;
   JWT_REFRESH_TOKEN_SECRET: string;
   RESET_PASSWORD_TOKEN_SECRET: string;
+  GOOGLE_CLIENT_ID?: string;
 }
 
 const defaults: Keys = {
@@ -14,6 +15,7 @@ const defaults: Keys = {
   RESET_PASSWORD_TOKEN_SECRET: process.env.RESET_PASSWORD_TOKEN_SECRET!,
   MONGODB_URI: process.env.MONGODB_URI!,
   LOGS_MONGO_URI: process.env.LOGS_MONGO_URI!,
+  GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID,
 };
 
 const ciKeys: Keys = {

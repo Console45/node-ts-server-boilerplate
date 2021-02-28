@@ -5,6 +5,8 @@ import { USER_MODEL_TOKEN } from "../database/models/User";
 import ApiError, { UnAuthorizedRequest } from "../utils/api-error";
 import { AccessToken, IUser, IUserModel } from "../@types/user-model";
 import { authLogger, httpLogger } from "../utils/loggers";
+import { LoginTicket, OAuth2Client, TokenPayload } from "google-auth-library";
+import { GOOGLE_AUTH_CLIENT_TOKEN } from "../utils/google-auth-client";
 
 interface UserAndToken {
   user: IUser;
@@ -15,9 +17,14 @@ interface UserAndToken {
 class AuthServices {
   @Inject(USER_MODEL_TOKEN)
   private readonly _userModel: IUserModel;
+  private readonly _googleClient: OAuth2Client;
   private static _res: Response;
-  constructor(userModel: IUserModel) {
+  constructor(
+    userModel: IUserModel,
+    @Inject(GOOGLE_AUTH_CLIENT_TOKEN) googleClient: OAuth2Client
+  ) {
     this._userModel = userModel;
+    this._googleClient = googleClient;
     this.initalizeEventsListeners();
   }
 
@@ -58,10 +65,12 @@ class AuthServices {
     );
     return { user, accessToken };
   }
+
   /**
    *
    * @param body user data
    * @param params route params
+   * @returns object of user and accesstoken
    */
   public async loginUser(body: any, params: any): Promise<UserAndToken> {
     const user: IUser = await this._userModel.findByCredentials(
@@ -74,6 +83,34 @@ class AuthServices {
       );
       throw new UnAuthorizedRequest("access denied.");
     }
+    const accessToken: AccessToken = await user.createAccessToken();
+    eventEmitter.emit(Events.LOGIN_USER, { user });
+    authLogger.info(
+      `message:${user.role} login was sucessful,email:${user.email},name:${user.name}`
+    );
+    return { user, accessToken };
+  }
+
+  /**
+   * @param body express body object
+   * @returns object of user and accesstoken
+   */
+  public async gooleLoginUser(body: any): Promise<UserAndToken> {
+    const idToken: string = body.idToken;
+    const loginTicket: LoginTicket = await this._googleClient.verifyIdToken({
+      idToken,
+      audience: process.env.GOOGLE_CLIENT_ID,
+    });
+    const tokenPayload: TokenPayload | undefined = loginTicket.getPayload();
+    if (!tokenPayload || !tokenPayload.email_verified || !tokenPayload.email) {
+      authLogger.error(`message:google login failed`);
+      throw new UnAuthorizedRequest("Google Login Failed");
+    }
+    const user: IUser = await this._userModel.findOrCreate(
+      tokenPayload.email,
+      tokenPayload.sub,
+      tokenPayload.name
+    );
     const accessToken: AccessToken = await user.createAccessToken();
     eventEmitter.emit(Events.LOGIN_USER, { user });
     authLogger.info(

@@ -59,4 +59,24 @@ class AuthController {
       next(err);
     }
   }
+
+  @post("/google_login")
+  async postGoogleLogin({ body }: Request, res: Response, next: NextFunction) {
+    authServiceInstance.res = res;
+    try {
+      const { user, accessToken } = await authServiceInstance.gooleLoginUser(
+        body
+      );
+      return res.send({
+        status: "success",
+        message: `${user.role} login successfully`,
+        data: {
+          user,
+          token: accessToken,
+        },
+      });
+    } catch (err) {
+      next(err);
+    }
+  }
 }

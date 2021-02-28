@@ -149,6 +149,7 @@ export const apiErrorHandler: ErrorRequestHandler = (
       data: null,
     });
   }
+
   httpLogger.error(
     `statusCode:${HttpErrorCodes.INTERNAL_SERVER},message:${err.message},data:null`
   );
