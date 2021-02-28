@@ -6,6 +6,7 @@ import {
   registerSchema,
   loginParamsSchema,
   loginSchema,
+  googleLoginSchema,
 } from "../validators/schema";
 
 @controller("/auth")
@@ -61,6 +62,7 @@ class AuthController {
   }
 
   @post("/google_login")
+  @validate({ schema: googleLoginSchema, field: ValidationFields.BODY })
   async postGoogleLogin({ body }: Request, res: Response, next: NextFunction) {
     authServiceInstance.res = res;
     try {

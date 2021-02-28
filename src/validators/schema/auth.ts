@@ -17,3 +17,7 @@ export const loginParamsSchema: ObjectSchema = Joi.object().keys({
     "any.only": "route parameter must be one of [user, admin, super-admin]",
   }),
 });
+
+export const googleLoginSchema: ObjectSchema = Joi.object().keys({
+  idToken: Joi.string().required().min(500),
+});
