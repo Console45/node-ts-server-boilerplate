@@ -20,7 +20,7 @@ export const validationFunction = (validators: Validator[]): RequestHandler => {
       }
       next();
     } catch (err) {
-      next(new BadRequest(`${err.message}.`));
+      next(new BadRequest(`${err.message}`));
     }
   };
 };
