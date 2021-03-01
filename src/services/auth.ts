@@ -29,6 +29,7 @@ class AuthServices {
     REFRESH_TOKEN: "refresh-Token",
     REGISTER_USER: "register-user",
     LOGIN_USER: "login-user",
+    LOGOUT_USER: "logout-user",
   };
   constructor(
     userModel: IUserModel,
@@ -71,7 +72,9 @@ class AuthServices {
     const user: IUser = new this._userModel(body);
     await user.save();
     const accessToken: AccessToken = await user.createAccessToken();
-    eventEmitter.emit(this._events.REGISTER_USER, { user });
+    eventEmitter.emit(this._events.REGISTER_USER, {
+      refreshToken: user.createRefreshToken(),
+    });
     authLogger.info(
       `message:${user.role} registeration was sucessful,email:${user.email},name:${user.name}`
     );
@@ -96,7 +99,9 @@ class AuthServices {
       throw new UnAuthorizedRequest("access denied.");
     }
     const accessToken: AccessToken = await user.createAccessToken();
-    eventEmitter.emit(this._events.LOGIN_USER, { user });
+    eventEmitter.emit(this._events.LOGIN_USER, {
+      refreshToken: user.createRefreshToken(),
+    });
     authLogger.info(
       `message:${user.role} login was sucessful,email:${user.email},name:${user.name}`
     );
@@ -125,7 +130,9 @@ class AuthServices {
       tokenPayload.name
     );
     const accessToken: AccessToken = await user.createAccessToken();
-    eventEmitter.emit(this._events.LOGIN_USER, { user });
+    eventEmitter.emit(this._events.LOGIN_USER, {
+      refreshToken: user.createRefreshToken(),
+    });
     authLogger.info(
       `message:${user.role} login was sucessful,email:${user.email},name:${user.name}`
     );
@@ -162,17 +169,41 @@ class AuthServices {
       authLogger.error(`message:${message},userID:${payload.userId}`);
       throw new ForbiddenRequest(message);
     }
-    eventEmitter.emit(this._events.REFRESH_TOKEN, { user });
+    eventEmitter.emit(this._events.REFRESH_TOKEN, {
+      refreshToken: user.createRefreshToken(),
+    });
+    authLogger.info("Access token refreshed successfully");
     const accessToken = await user.createAccessToken();
     return accessToken;
+  }
+
+  public async checkAuth(token: string): Promise<IUser> {
+    const payload = verify(token, keys.JWT_ACCESS_TOKEN_SECRET);
+    const user: IUser | null = await this._userModel.findOne({
+      _id: (payload as any).userId,
+      ["accessTokens.token"]: token,
+    });
+    if (!user) throw new Error();
+    return user;
+  }
+
+  public async logoutUser(user: IUser, accessToken: string): Promise<IUser> {
+    user.accessTokens = user.accessTokens.filter(
+      token => token.token !== accessToken
+    );
+    eventEmitter.emit(this._events.LOGOUT_USER, {
+      refreshToken: "",
+    });
+    await user.save();
+    return user;
   }
   /**
    * sends refresh token on even trigger
    * @param event event name
    */
   private sendRefeshTokenEventListener(event: string): void {
-    eventEmitter.on(event, ({ user }: { user: IUser }) => {
-      AuthServices._res.cookie("jid", user.createRefreshToken(), {
+    eventEmitter.on(event, ({ refreshToken }: { refreshToken: string }) => {
+      AuthServices._res.cookie("jid", refreshToken, {
         httpOnly: true,
         path: "/auth/refresh_token",
       });
