@@ -166,7 +166,10 @@ class AuthServices {
     const accessToken = await user.createAccessToken();
     return accessToken;
   }
-
+  /**
+   * sends refresh token on even trigger
+   * @param event event name
+   */
   private sendRefeshTokenEventListener(event: string): void {
     eventEmitter.on(event, ({ user }: { user: IUser }) => {
       AuthServices._res.cookie("jid", user.createRefreshToken(), {
