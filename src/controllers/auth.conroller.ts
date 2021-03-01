@@ -1,6 +1,6 @@
 import { ValidationFields } from "./../constants/constant";
 import { Request, Response, NextFunction } from "express";
-import { controller, post, validate } from "../decorators";
+import { controller, post, use, validate } from "../decorators";
 import { authServiceInstance } from "../services/auth";
 import {
   registerSchema,
@@ -8,6 +8,7 @@ import {
   loginSchema,
   googleLoginSchema,
 } from "../validators/schema";
+import { auth } from "../middlewares/auth";
 
 @controller("/auth")
 class AuthController {
@@ -89,6 +90,26 @@ class AuthController {
         message: "Refreshed access token successfully",
         data: {
           token,
+        },
+      });
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  @post("/logout")
+  @use(auth)
+  async postLogout(req: any, res: Response, next: NextFunction) {
+    try {
+      const user = await authServiceInstance.logoutUser(
+        req.user,
+        req.accessToken
+      );
+      res.json({
+        status: "success",
+        message: `${user.role} logout is successful`,
+        data: {
+          user,
         },
       });
     } catch (err) {
