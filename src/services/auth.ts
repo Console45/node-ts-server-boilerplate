@@ -2,11 +2,17 @@ import { Response } from "express";
 import { Container, Service, Inject } from "typedi";
 import { eventEmitter, Events } from "../utils/event-emitter";
 import { USER_MODEL_TOKEN } from "../database/models/User";
-import ApiError, { UnAuthorizedRequest } from "../utils/api-error";
+import ApiError, {
+  ForbiddenRequest,
+  NotFoundError,
+  UnAuthorizedRequest,
+} from "../utils/api-error";
 import { AccessToken, IUser, IUserModel } from "../@types/user-model";
 import { authLogger, httpLogger } from "../utils/loggers";
 import { LoginTicket, OAuth2Client, TokenPayload } from "google-auth-library";
 import { GOOGLE_AUTH_CLIENT_TOKEN } from "../utils/google-auth-client";
+import { verify } from "jsonwebtoken";
+import keys from "../constants/keys";
 
 interface UserAndToken {
   user: IUser;
@@ -34,6 +40,7 @@ class AuthServices {
   private initalizeEventsListeners(): void {
     this.sendRefeshTokenEventListener(Events.REGISTER_USER);
     this.sendRefeshTokenEventListener(Events.LOGIN_USER);
+    this.sendRefeshTokenEventListener(Events.REFRESH_TOKEN);
   }
 
   /**
@@ -119,7 +126,37 @@ class AuthServices {
     return { user, accessToken };
   }
 
-  private sendRefeshTokenEventListener(event: string) {
+  public async refreshToken(cookies: any): Promise<AccessToken> {
+    const token: string = cookies.jid;
+    if (!token) throw new UnAuthorizedRequest("No token found");
+    let payload: any;
+    let message: string;
+    try {
+      payload = verify(token, keys.JWT_REFRESH_TOKEN_SECRET);
+    } catch (err) {
+      message = "Token has expired";
+      authLogger.info(`message:${message}`);
+      throw new UnAuthorizedRequest(message);
+    }
+    const user: IUser | null = await this._userModel.findOne({
+      _id: payload.userId,
+    });
+    if (!user) {
+      message = "User not found";
+      authLogger.info(`message:${message},userID:${payload.userId}`);
+      throw new NotFoundError(message);
+    }
+    if (user.refreshTokenVersion !== payload.tokenVersion) {
+      message = "Token has been revoked";
+      authLogger.info(`message:${message},userID:${payload.userId}`);
+      throw new ForbiddenRequest(message);
+    }
+    eventEmitter.emit(Events.REFRESH_TOKEN, { user });
+    const accessToken = await user.createAccessToken();
+    return accessToken;
+  }
+
+  private sendRefeshTokenEventListener(event: string): void {
     eventEmitter.on(event, ({ user }: { user: IUser }) => {
       AuthServices._res.cookie("jid", user.createRefreshToken(), {
         httpOnly: true,
