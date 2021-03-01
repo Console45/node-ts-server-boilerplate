@@ -79,7 +79,7 @@ class AuthServices {
   }
 
   /**
-   *
+   * logs in an existing user
    * @param body user data
    * @param params route params
    * @returns object of user and accesstoken
@@ -104,6 +104,7 @@ class AuthServices {
   }
 
   /**
+   * logs in using google oAuth
    * @param body express body object
    * @returns object of user and accesstoken
    */
@@ -131,6 +132,11 @@ class AuthServices {
     return { user, accessToken };
   }
 
+  /**
+   *  Refreshes access token and refresh token
+   * @param cookies refresh token
+   * @returns access token
+   */
   public async refreshToken(cookies: any): Promise<AccessToken> {
     const token: string = cookies.jid;
     if (!token) throw new UnAuthorizedRequest("No token found");
