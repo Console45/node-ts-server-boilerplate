@@ -88,13 +88,13 @@ userSchema.statics.findByCredentials = async (
   const user: IUser | null = await User.findOne({ email });
   let message: string;
   if (!user) {
-    message = "account doesnt exist";
+    message = "Account doesnt exist";
     authLogger.error(`message:${message},email:${email}`);
     throw new NotFoundError(message);
   }
   const isMatch = await compare(password, user.password);
   if (!isMatch) {
-    message = "invalid credentials.";
+    message = "Invalid credentials.";
     authLogger.error(`message:${message},email:${email}`);
     throw new UnAuthorizedRequest(message);
   }
@@ -120,6 +120,20 @@ userSchema.statics.findOrCreate = async (
     return newUser;
   }
   return user;
+};
+
+userSchema.statics.revokeRefreshToken = async (userId: string) => {
+  await User.findOneAndUpdate(
+    { _id: userId },
+    { $inc: { refreshTokenVersion: 1 } }
+  );
+};
+
+userSchema.statics.revokeResetPasswordToken = async (userId: string) => {
+  await User.findOneAndUpdate(
+    { _id: userId },
+    { $inc: { resetPasswordTokenVersion: 1 } }
+  );
 };
 
 userSchema.methods.isAdmin = function (this: IUser): boolean {
