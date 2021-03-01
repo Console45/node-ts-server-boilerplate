@@ -136,4 +136,24 @@ class AuthController {
       next(err);
     }
   }
+
+  @post("/reset_password/:token")
+  async postResetPassword(
+    { body, params }: Request,
+    res: Response,
+    next: NextFunction
+  ) {
+    try {
+      const user = await authServiceInstance.resetPassword(body, params);
+      res.json({
+        status: "success",
+        message: "Password resetted successfully".replace,
+        data: {
+          user,
+        },
+      });
+    } catch (err) {
+      next;
+    }
+  }
 }
