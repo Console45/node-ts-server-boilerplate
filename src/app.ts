@@ -8,7 +8,7 @@ import cookieParser from "cookie-parser";
 import { connectDatabase } from "./database/database-config";
 import { apiErrorHandler } from "./utils/api-error";
 import { AppRouter } from "./utils/app-router";
-import { shouldCompress } from "./utils/app-utils";
+import { passRes, shouldCompress } from "./utils/app-utils";
 import "./controllers/root.controller";
 import "./controllers/auth.conroller";
 import morgan from "morgan";
@@ -27,6 +27,7 @@ app.use(cookieParser());
 app.use(compression({ filter: shouldCompress }));
 app.use(json());
 app.use(urlencoded({ extended: false }));
+app.use(passRes);
 app.use(AppRouter.instance);
 app.use(apiErrorHandler);
 

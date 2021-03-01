@@ -8,14 +8,12 @@ import {
   loginSchema,
   googleLoginSchema,
 } from "../validators/schema";
-import { UnAuthorizedRequest } from "../utils/api-error";
 
 @controller("/auth")
 class AuthController {
   @post("/register")
   @validate({ schema: registerSchema, field: ValidationFields.BODY })
   async postRegister({ body }: Request, res: Response, next: NextFunction) {
-    authServiceInstance.res = res;
     try {
       const { user, accessToken } = await authServiceInstance.registerUser(
         body
@@ -43,7 +41,6 @@ class AuthController {
     res: Response,
     next: NextFunction
   ) {
-    authServiceInstance.res = res;
     try {
       const { user, accessToken } = await authServiceInstance.loginUser(
         body,
@@ -65,7 +62,6 @@ class AuthController {
   @post("/google_login")
   @validate({ schema: googleLoginSchema, field: ValidationFields.BODY })
   async postGoogleLogin({ body }: Request, res: Response, next: NextFunction) {
-    authServiceInstance.res = res;
     try {
       const { user, accessToken } = await authServiceInstance.gooleLoginUser(
         body
