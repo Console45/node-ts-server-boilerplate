@@ -144,7 +144,7 @@ export const apiErrorHandler: ErrorRequestHandler = (
       `statusCode:${HttpErrorCodes.BAD_REQUEST},message:invalid JSON payload passed,data:null`
     );
     return res.status(HttpErrorCodes.BAD_REQUEST).json({
-      message: "invalid JSON payload passed.",
+      message: "invalid JSON payload passed",
       status: "error",
       data: null,
     });
