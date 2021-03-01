@@ -3,16 +3,23 @@ import { Container, Service, Inject } from "typedi";
 import { eventEmitter } from "../utils/event-emitter";
 import { USER_MODEL_TOKEN } from "../database/models/User";
 import ApiError, {
+  BadRequest,
   ForbiddenRequest,
   NotFoundError,
   UnAuthorizedRequest,
 } from "../utils/api-error";
-import { AccessToken, IUser, IUserModel } from "../@types/user-model";
+import {
+  AccessToken,
+  IUser,
+  IUserModel,
+  ResetPasswordToken,
+} from "../@types/user-model";
 import { authLogger, httpLogger } from "../utils/loggers";
 import { LoginTicket, OAuth2Client, TokenPayload } from "google-auth-library";
 import { GOOGLE_AUTH_CLIENT_TOKEN } from "../utils/google-auth-client";
 import { verify } from "jsonwebtoken";
 import keys from "../constants/keys";
+import { compare } from "bcrypt";
 
 interface UserAndToken {
   user: IUser;
@@ -31,6 +38,7 @@ class AuthServices {
     LOGIN_USER: "login-user",
     LOGOUT_USER: "logout-user",
   };
+  private _errorMessage: string = "";
   constructor(
     userModel: IUserModel,
     @Inject(GOOGLE_AUTH_CLIENT_TOKEN) googleClient: OAuth2Client
@@ -66,8 +74,9 @@ class AuthServices {
       email: body.email,
     });
     if (existingUser) {
-      authLogger.error(`message:user already exist,email:${body.email},`);
-      throw new ApiError(409, `email ${body.email} already exists`);
+      this._errorMessage = `Email ${body.email} already exists`;
+      authLogger.error(`message:${this._errorMessage},email:${body.email},`);
+      throw new ApiError(409, this._errorMessage);
     }
     const user: IUser = new this._userModel(body);
     await user.save();
@@ -93,10 +102,11 @@ class AuthServices {
       body.password
     );
     if (params.role === "admin" && user.role === "User") {
+      this._errorMessage = "Access denied";
       authLogger.error(
-        `message:access denied,email:${user.email},userId:${user.id}`
+        `message:${this._errorMessage},email:${user.email},userId:${user.id}`
       );
-      throw new UnAuthorizedRequest("access denied.");
+      throw new UnAuthorizedRequest(this._errorMessage);
     }
     const accessToken: AccessToken = await user.createAccessToken();
     eventEmitter.emit(this._events.LOGIN_USER, {
@@ -120,9 +130,11 @@ class AuthServices {
       audience: process.env.GOOGLE_CLIENT_ID,
     });
     const tokenPayload: TokenPayload | undefined = loginTicket.getPayload();
+
     if (!tokenPayload || !tokenPayload.email_verified || !tokenPayload.email) {
-      authLogger.error(`message:google login failed`);
-      throw new UnAuthorizedRequest("Google Login Failed");
+      this._errorMessage = "Google Login Failed";
+      authLogger.error(`message:${this._errorMessage}`);
+      throw new UnAuthorizedRequest(this._errorMessage);
     }
     const user: IUser = await this._userModel.findOrCreate(
       tokenPayload.email,
@@ -146,28 +158,35 @@ class AuthServices {
    */
   public async refreshToken(cookies: any): Promise<AccessToken> {
     const token: string = cookies.jid;
-    if (!token) throw new UnAuthorizedRequest("No token found");
+    if (!token) {
+      this._errorMessage = "No token found";
+      authLogger.error(`message:${this._errorMessage}`);
+      throw new UnAuthorizedRequest(this._errorMessage);
+    }
     let payload: any;
-    let message: string;
     try {
       payload = verify(token, keys.JWT_REFRESH_TOKEN_SECRET);
     } catch (err) {
-      message = "Token has expired";
-      authLogger.error(`message:${message}`);
-      throw new UnAuthorizedRequest(message);
+      this._errorMessage = "Token has expired";
+      authLogger.error(`message:${this._errorMessage}`);
+      throw new UnAuthorizedRequest(this._errorMessage);
     }
     const user: IUser | null = await this._userModel.findOne({
       _id: payload.userId,
     });
     if (!user) {
-      message = "User not found";
-      authLogger.error(`message:${message},userID:${payload.userId}`);
-      throw new NotFoundError(message);
+      this._errorMessage = "User not found";
+      authLogger.error(
+        `message:${this._errorMessage},userID:${payload.userId}`
+      );
+      throw new NotFoundError(this._errorMessage);
     }
     if (user.refreshTokenVersion !== payload.tokenVersion) {
-      message = "Token has been revoked";
-      authLogger.error(`message:${message},userID:${payload.userId}`);
-      throw new ForbiddenRequest(message);
+      this._errorMessage = "Token has been revoked";
+      authLogger.error(
+        `message:${this._errorMessage},userID:${payload.userId}`
+      );
+      throw new ForbiddenRequest(this._errorMessage);
     }
     eventEmitter.emit(this._events.REFRESH_TOKEN, {
       refreshToken: user.createRefreshToken(),
@@ -188,7 +207,8 @@ class AuthServices {
       ["accessTokens.token"]: token,
     });
     if (!user) {
-      authLogger.error(`Not authenticated`);
+      this._errorMessage = `Not authenticated`;
+      authLogger.error(`message:${this._errorMessage}`);
       throw new Error();
     }
     return user;
@@ -209,6 +229,22 @@ class AuthServices {
     await user.save();
     return user;
   }
+
+  public async forgotPassword(body: any): Promise<ResetPasswordToken> {
+    const user: IUser | null = await this._userModel.findOne({
+      email: body.email,
+    });
+
+    if (!user) {
+      this._errorMessage = "Account does not exist";
+      authLogger.error(`message:${this._errorMessage}, email:${body.email}`);
+      throw new NotFoundError(this._errorMessage);
+    }
+    await this._userModel.revokeRefreshToken(user._id);
+    const token: ResetPasswordToken = user.createResetPasswordToken();
+    return token;
+  }
+
   /**
    * sends refresh token on even trigger
    * @param event event name

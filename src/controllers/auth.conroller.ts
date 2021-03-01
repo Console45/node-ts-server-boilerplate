@@ -116,4 +116,24 @@ class AuthController {
       next(err);
     }
   }
+
+  @post("/forgot_password")
+  async postForgotPassword(
+    { body }: Request,
+    res: Response,
+    next: NextFunction
+  ) {
+    try {
+      const token = await authServiceInstance.forgotPassword(body);
+      res.json({
+        status: "success",
+        message: "Reset password token created successfully",
+        data: {
+          token,
+        },
+      });
+    } catch (err) {
+      next(err);
+    }
+  }
 }

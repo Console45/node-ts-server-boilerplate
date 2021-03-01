@@ -97,4 +97,14 @@ export interface IUserModel extends Model<IUser> {
    *
    */
   findOrCreate(email: string, password: string, name?: string): Promise<IUser>;
+  /**
+   * Revoke the current refreshToken
+   * @param userId user id
+   */
+  revokeRefreshToken(userId: string): Promise<void>;
+  /**
+   * Revoke the current resetPasswordToken
+   * @param userId user id
+   */
+  revokeResetPasswordToken(userId: string): Promise<void>;
 }
