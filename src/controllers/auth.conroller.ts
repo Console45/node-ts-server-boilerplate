@@ -8,6 +8,7 @@ import {
   loginSchema,
   googleLoginSchema,
 } from "../validators/schema";
+import { UnAuthorizedRequest } from "../utils/api-error";
 
 @controller("/auth")
 class AuthController {
@@ -69,12 +70,29 @@ class AuthController {
       const { user, accessToken } = await authServiceInstance.gooleLoginUser(
         body
       );
-      return res.send({
+      return res.json({
         status: "success",
         message: `${user.role} login successfully`,
         data: {
           user,
           token: accessToken,
+        },
+      });
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  @post("/refresh_token")
+  async postRefreshToken(req: any, res: Response, next: NextFunction) {
+    try {
+      const token = await authServiceInstance.refreshToken(req.cookies);
+      req.accessToken = token.accessToken;
+      res.json({
+        status: "success",
+        message: "Refreshed access token successfully",
+        data: {
+          token,
         },
       });
     } catch (err) {
