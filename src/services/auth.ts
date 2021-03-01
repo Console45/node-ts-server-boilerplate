@@ -176,7 +176,11 @@ class AuthServices {
     const accessToken = await user.createAccessToken();
     return accessToken;
   }
-
+  /**
+   * Checks access token to see if user is authenticated
+   * @param token accessToken
+   * @return authenticated user
+   */
   public async checkAuth(token: string): Promise<IUser> {
     const payload = verify(token, keys.JWT_ACCESS_TOKEN_SECRET);
     const user: IUser | null = await this._userModel.findOne({
@@ -189,7 +193,11 @@ class AuthServices {
     }
     return user;
   }
-
+  /**
+   * Logs out an authenticated user
+   * @param user authenticated user
+   * @param accessToken current access token
+   */
   public async logoutUser(user: IUser, accessToken: string): Promise<IUser> {
     user.accessTokens = user.accessTokens.filter(
       token => token.token !== accessToken
