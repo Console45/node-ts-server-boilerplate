@@ -1,6 +1,6 @@
 import { Response } from "express";
 import { Container, Service, Inject } from "typedi";
-import { eventEmitter, Events } from "../utils/event-emitter";
+import { eventEmitter } from "../utils/event-emitter";
 import { USER_MODEL_TOKEN } from "../database/models/User";
 import ApiError, {
   ForbiddenRequest,
@@ -25,6 +25,11 @@ class AuthServices {
   private readonly _userModel: IUserModel;
   private readonly _googleClient: OAuth2Client;
   private static _res: Response;
+  private readonly _events = {
+    REFRESH_TOKEN: "refresh-Token",
+    REGISTER_USER: "register-user",
+    LOGIN_USER: "login-user",
+  };
   constructor(
     userModel: IUserModel,
     @Inject(GOOGLE_AUTH_CLIENT_TOKEN) googleClient: OAuth2Client
@@ -38,9 +43,9 @@ class AuthServices {
    * Initializes event listeners
    */
   private initalizeEventsListeners(): void {
-    this.sendRefeshTokenEventListener(Events.REGISTER_USER);
-    this.sendRefeshTokenEventListener(Events.LOGIN_USER);
-    this.sendRefeshTokenEventListener(Events.REFRESH_TOKEN);
+    this.sendRefeshTokenEventListener(this._events.REGISTER_USER);
+    this.sendRefeshTokenEventListener(this._events.LOGIN_USER);
+    this.sendRefeshTokenEventListener(this._events.REFRESH_TOKEN);
   }
 
   /**
@@ -66,7 +71,7 @@ class AuthServices {
     const user: IUser = new this._userModel(body);
     await user.save();
     const accessToken: AccessToken = await user.createAccessToken();
-    eventEmitter.emit(Events.REGISTER_USER, { user });
+    eventEmitter.emit(this._events.REGISTER_USER, { user });
     authLogger.info(
       `message:${user.role} registeration was sucessful,email:${user.email},name:${user.name}`
     );
@@ -91,7 +96,7 @@ class AuthServices {
       throw new UnAuthorizedRequest("access denied.");
     }
     const accessToken: AccessToken = await user.createAccessToken();
-    eventEmitter.emit(Events.LOGIN_USER, { user });
+    eventEmitter.emit(this._events.LOGIN_USER, { user });
     authLogger.info(
       `message:${user.role} login was sucessful,email:${user.email},name:${user.name}`
     );
@@ -119,7 +124,7 @@ class AuthServices {
       tokenPayload.name
     );
     const accessToken: AccessToken = await user.createAccessToken();
-    eventEmitter.emit(Events.LOGIN_USER, { user });
+    eventEmitter.emit(this._events.LOGIN_USER, { user });
     authLogger.info(
       `message:${user.role} login was sucessful,email:${user.email},name:${user.name}`
     );
@@ -151,7 +156,7 @@ class AuthServices {
       authLogger.info(`message:${message},userID:${payload.userId}`);
       throw new ForbiddenRequest(message);
     }
-    eventEmitter.emit(Events.REFRESH_TOKEN, { user });
+    eventEmitter.emit(this._events.REFRESH_TOKEN, { user });
     const accessToken = await user.createAccessToken();
     return accessToken;
   }
