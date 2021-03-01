@@ -9,7 +9,7 @@ export const auth = async (
 ): Promise<void> => {
   try {
     const token: string = req.header("Authorization")!.replace("Bearer ", "");
-    const user = authServiceInstance.checkAuth(token);
+    const user = await authServiceInstance.checkAuth(token);
     req.user = user;
     req.accessToken = token;
     next();

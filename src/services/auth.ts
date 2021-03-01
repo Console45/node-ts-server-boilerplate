@@ -183,7 +183,10 @@ class AuthServices {
       _id: (payload as any).userId,
       ["accessTokens.token"]: token,
     });
-    if (!user) throw new Error();
+    if (!user) {
+      authLogger.error(`Not authenticated`);
+      throw new Error();
+    }
     return user;
   }
 
@@ -194,6 +197,7 @@ class AuthServices {
     eventEmitter.emit(this._events.LOGOUT_USER, {
       refreshToken: "",
     });
+    authLogger.info(`${user.role} logout is successful`);
     await user.save();
     return user;
   }
