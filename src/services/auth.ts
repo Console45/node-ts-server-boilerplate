@@ -146,7 +146,7 @@ class AuthServices {
       payload = verify(token, keys.JWT_REFRESH_TOKEN_SECRET);
     } catch (err) {
       message = "Token has expired";
-      authLogger.info(`message:${message}`);
+      authLogger.error(`message:${message}`);
       throw new UnAuthorizedRequest(message);
     }
     const user: IUser | null = await this._userModel.findOne({
@@ -154,12 +154,12 @@ class AuthServices {
     });
     if (!user) {
       message = "User not found";
-      authLogger.info(`message:${message},userID:${payload.userId}`);
+      authLogger.error(`message:${message},userID:${payload.userId}`);
       throw new NotFoundError(message);
     }
     if (user.refreshTokenVersion !== payload.tokenVersion) {
       message = "Token has been revoked";
-      authLogger.info(`message:${message},userID:${payload.userId}`);
+      authLogger.error(`message:${message},userID:${payload.userId}`);
       throw new ForbiddenRequest(message);
     }
     eventEmitter.emit(this._events.REFRESH_TOKEN, { user });
