@@ -1,6 +1,6 @@
 import { Response } from "express";
 import { Container, Service, Inject } from "typedi";
-import { eventEmitter } from "../utils/event-emitter";
+import { eventEmitter, EVENT_EMITTER_TOKEN } from "../utils/event-emitter";
 import { USER_MODEL_TOKEN } from "../database/models/User";
 import ApiError, {
   BadRequest,
@@ -20,6 +20,7 @@ import { GOOGLE_AUTH_CLIENT_TOKEN } from "../utils/google-auth-client";
 import { verify } from "jsonwebtoken";
 import keys from "../constants/keys";
 import { compare } from "bcrypt";
+import { EventEmitter } from "stream";
 
 interface UserAndToken {
   user: IUser;
@@ -37,14 +38,19 @@ class AuthServices {
     REGISTER_USER: "register-user",
     LOGIN_USER: "login-user",
     LOGOUT_USER: "logout-user",
+    FORGOT_PASSWORD: "forgot-password",
+    RESET_PASSWORD: "reset-password",
   };
   private _errorMessage: string = "";
+  private readonly _evenEmitter: EventEmitter;
   constructor(
     userModel: IUserModel,
-    @Inject(GOOGLE_AUTH_CLIENT_TOKEN) googleClient: OAuth2Client
+    @Inject(GOOGLE_AUTH_CLIENT_TOKEN) googleClient: OAuth2Client,
+    @Inject(EVENT_EMITTER_TOKEN) eventEmitter: EventEmitter
   ) {
     this._userModel = userModel;
     this._googleClient = googleClient;
+    this._evenEmitter = eventEmitter;
     this.initalizeEventsListeners();
   }
 
@@ -55,6 +61,18 @@ class AuthServices {
     this.sendRefeshTokenEventListener(this._events.REGISTER_USER);
     this.sendRefeshTokenEventListener(this._events.LOGIN_USER);
     this.sendRefeshTokenEventListener(this._events.REFRESH_TOKEN);
+    this._evenEmitter.on(
+      this._events.FORGOT_PASSWORD,
+      async ({ user }: { user: IUser }) => {
+        await this._userModel.revokeRefreshToken(user._id);
+      }
+    );
+    this._evenEmitter.on(
+      this._events.RESET_PASSWORD,
+      async ({ user }: { user: IUser }) => {
+        await this._userModel.revokeResetPasswordToken(user._id);
+      }
+    );
   }
 
   /**
@@ -81,7 +99,7 @@ class AuthServices {
     const user: IUser = new this._userModel(body);
     await user.save();
     const accessToken: AccessToken = await user.createAccessToken();
-    eventEmitter.emit(this._events.REGISTER_USER, {
+    this._evenEmitter.emit(this._events.REGISTER_USER, {
       refreshToken: user.createRefreshToken(),
     });
     authLogger.info(
@@ -109,7 +127,7 @@ class AuthServices {
       throw new UnAuthorizedRequest(this._errorMessage);
     }
     const accessToken: AccessToken = await user.createAccessToken();
-    eventEmitter.emit(this._events.LOGIN_USER, {
+    this._evenEmitter.emit(this._events.LOGIN_USER, {
       refreshToken: user.createRefreshToken(),
     });
     authLogger.info(
@@ -142,7 +160,7 @@ class AuthServices {
       tokenPayload.name
     );
     const accessToken: AccessToken = await user.createAccessToken();
-    eventEmitter.emit(this._events.LOGIN_USER, {
+    this._evenEmitter.emit(this._events.LOGIN_USER, {
       refreshToken: user.createRefreshToken(),
     });
     authLogger.info(
@@ -188,7 +206,7 @@ class AuthServices {
       );
       throw new ForbiddenRequest(this._errorMessage);
     }
-    eventEmitter.emit(this._events.REFRESH_TOKEN, {
+    this._evenEmitter.emit(this._events.REFRESH_TOKEN, {
       refreshToken: user.createRefreshToken(),
     });
     authLogger.info("Access token refreshed successfully");
@@ -198,7 +216,7 @@ class AuthServices {
   /**
    * Checks access token to see if user is authenticated
    * @param token accessToken
-   * @return authenticated user
+   * @returns authenticated user
    */
   public async checkAuth(token: string): Promise<IUser> {
     const payload = verify(token, keys.JWT_ACCESS_TOKEN_SECRET);
@@ -217,19 +235,24 @@ class AuthServices {
    * Logs out an authenticated user
    * @param user authenticated user
    * @param accessToken current access token
+   * @returns a user
    */
   public async logoutUser(user: IUser, accessToken: string): Promise<IUser> {
     user.accessTokens = user.accessTokens.filter(
       token => token.token !== accessToken
     );
-    eventEmitter.emit(this._events.LOGOUT_USER, {
+    this._evenEmitter.emit(this._events.LOGOUT_USER, {
       refreshToken: "",
     });
     authLogger.info(`${user.role} logout is successful`);
     await user.save();
     return user;
   }
-
+  /**
+   * Generates a reset password token
+   * @param body request body
+   * @returns reset password token
+   */
   public async forgotPassword(body: any): Promise<ResetPasswordToken> {
     const user: IUser | null = await this._userModel.findOne({
       email: body.email,
@@ -240,23 +263,56 @@ class AuthServices {
       authLogger.error(`message:${this._errorMessage}, email:${body.email}`);
       throw new NotFoundError(this._errorMessage);
     }
-    await this._userModel.revokeRefreshToken(user._id);
+    this._evenEmitter.emit(this._events.FORGOT_PASSWORD, { user });
     const token: ResetPasswordToken = user.createResetPasswordToken();
     return token;
   }
 
   /**
+   * Reset a users password
+   * @param body request body
+   * @param params request params
+   * @returns returns a user
+   */
+  public async resetPassword(body: any, params: any): Promise<IUser> {
+    const token: string = params.token;
+    const payload: any = verify(token, keys.RESET_PASSWORD_TOKEN_SECRET);
+    const user: IUser | null = await this._userModel.findById(payload.userId);
+    if (!user) {
+      this._errorMessage = "Account does not exist";
+      authLogger.error(`message:${this._errorMessage}`);
+      throw new NotFoundError(this._errorMessage);
+    }
+    if (user.resetPasswordTokenVersion !== payload.tokenVersion) {
+      this._errorMessage = "Link has expired";
+      authLogger.error(`message:${this._errorMessage}`);
+      throw new ForbiddenRequest(this._errorMessage);
+    }
+    if (await compare(body.password, user.password)) {
+      this._errorMessage = "Old password and new password cannot be the same";
+      authLogger.error(`message:${this._errorMessage}`);
+      throw new BadRequest(this._errorMessage);
+    }
+    this._evenEmitter.emit(this._events.RESET_PASSWORD, { user });
+    user.password = body.password;
+    await user.save();
+    return user;
+  }
+  /**
    * sends refresh token on even trigger
    * @param event event name
    */
   private sendRefeshTokenEventListener(event: string): void {
-    eventEmitter.on(event, ({ refreshToken }: { refreshToken: string }) => {
-      AuthServices._res.cookie("jid", refreshToken, {
-        httpOnly: true,
-        path: "/auth/refresh_token",
-      });
-      httpLogger.http("Refresh Token Sent");
-    });
+    this._evenEmitter.on(
+      event,
+      ({ refreshToken }: { refreshToken: string }) => {
+        AuthServices._res.cookie("jid", refreshToken, {
+          httpOnly: true,
+          path: "/auth/refresh_token",
+        });
+        httpLogger.http("Refresh Token Sent");
+      }
+    );
   }
 }
 
