@@ -1,6 +1,6 @@
 import { Response } from "express";
 import { Container, Service, Inject } from "typedi";
-import { eventEmitter, EVENT_EMITTER_TOKEN } from "../utils/event-emitter";
+import { EVENT_EMITTER_TOKEN } from "../utils/event-emitter";
 import { USER_MODEL_TOKEN } from "../database/models/User";
 import ApiError, {
   BadRequest,
