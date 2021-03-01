@@ -1,3 +1,7 @@
+import {
+  resetPasswordParamSchema,
+  resetPasswordSchema,
+} from "./../validators/schema/auth";
 import { ValidationFields } from "./../constants/constant";
 import { Request, Response, NextFunction } from "express";
 import { controller, post, use, validate } from "../decorators";
@@ -7,6 +11,7 @@ import {
   loginParamsSchema,
   loginSchema,
   googleLoginSchema,
+  forgotPasswordSchema,
 } from "../validators/schema";
 import { auth } from "../middlewares/auth";
 
@@ -118,6 +123,7 @@ class AuthController {
   }
 
   @post("/forgot_password")
+  @validate({ schema: forgotPasswordSchema, field: ValidationFields.BODY })
   async postForgotPassword(
     { body }: Request,
     res: Response,
@@ -138,6 +144,10 @@ class AuthController {
   }
 
   @post("/reset_password/:token")
+  @validate(
+    { schema: resetPasswordSchema, field: ValidationFields.BODY },
+    { schema: resetPasswordParamSchema, field: ValidationFields.PARAMS }
+  )
   async postResetPassword(
     { body, params }: Request,
     res: Response,

@@ -21,3 +21,13 @@ export const loginParamsSchema: ObjectSchema = Joi.object().keys({
 export const googleLoginSchema: ObjectSchema = Joi.object().keys({
   idToken: Joi.string().required().min(500),
 });
+
+export const forgotPasswordSchema: ObjectSchema = Joi.object().keys({
+  email: Joi.string().email().required(),
+});
+export const resetPasswordSchema: ObjectSchema = Joi.object().keys({
+  password: Joi.string().min(6).required(),
+});
+export const resetPasswordParamSchema: ObjectSchema = Joi.object().keys({
+  token: Joi.string().required(),
+});
