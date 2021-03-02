@@ -163,7 +163,7 @@ class AuthController {
         },
       });
     } catch (err) {
-      next;
+      next(err);
     }
   }
 }
