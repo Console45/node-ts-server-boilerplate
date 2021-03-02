@@ -94,7 +94,7 @@ userSchema.statics.findByCredentials = async (
   }
   const isMatch = await compare(password, user.password);
   if (!isMatch) {
-    message = "Invalid credentials.";
+    message = "Invalid credentials";
     authLogger.error(`message:${message},email:${email}`);
     throw new UnAuthorizedRequest(message);
   }
