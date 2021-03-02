@@ -1,16 +1,15 @@
 language: node_js
 node_js:
-- 15
+  - 15
 dist: trusty
 services:
-- mongodb
+  - mongodb
 env:
   secure: WVvdZCeOwRmt+eLKyPEd7m+I0/CVz2xPDxJemKOa3aowJFlBAG056sjeOXlUkmGbdcNugAXH+AeQguJO8Mcp3Ybtocw8sRFFYM3yr2L/78zRZS8hTBxsmAlkB058LkxKupg3tosEe0x58XaWIpsIx9QaeuN8hT9Ca+VMrNs8av6eHWPkPz6gI8NjKb91fsLEhB7MCNY/p+pS4lDUqBPkYiDcgW9Bf1mqC8Vi2BDBIuXUsHpZ+hV1EYY1VHDVNUJutNJ1zMTIkwEFL+ll4fJlHEYHCv3sYvzoGrBJt4jM2zbnTp318b33cirW4aBClQ+M6SOV2e0AGdSn7g8w2vmg12tbH8DYXy8l9vzYydXSVz2Axk3yeJxC3Z/5uddQ4Xtw5ZGce9ApuNPWTOV3PmRRnf2n/D5urzSW64hWr9wEl+I2/vMBBY86flqxtbydmtTT/LRwaS0cbDlfqPVEBMetmhYRQiVw+7rKr+uIM9gWoqfT8bBLT6y06SeYawdFxsL70kgnSZ92+G1cuamgxljmcdroQ+8xSUrAcjO1RUuP+kICWa7pDwqfbNs6JUnfRexNieL2g+17YcGpn8/uBsPXpO3KTLBidYQGw0dQsJil+6x3Vnbha8WiarHb4j9tXu2DMju2kL9FUqpjpudpmYjzrhdUG4j/a7nKRINSdJd3UIQ=
 cache:
   directories:
-  - node_modules
+    - node_modules
 install:
-- yarn install
-- yarn build
+  - yarn install
 script:
-- yarn test
+  - yarn test
