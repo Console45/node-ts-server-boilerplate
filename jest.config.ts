@@ -1,5 +1,5 @@
 export default {
-  collectCoverage: true,
+  // collectCoverage: true,
   coverageDirectory: "coverage",
   coveragePathIgnorePatterns: ["\\\\node_modules\\\\"],
   coverageProvider: "v8",
