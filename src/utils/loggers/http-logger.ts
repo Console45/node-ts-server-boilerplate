@@ -7,7 +7,7 @@ import {
 
 export const httpLogger = logger({ filename: "http.log", level: "http" });
 
-if (process.env.NODE_ENV !== "production") {
+if (process.env.NODE_ENV === "development") {
   httpLogger.add(new transports.Console(consoleTransportStreamOptons("http")));
 }
 

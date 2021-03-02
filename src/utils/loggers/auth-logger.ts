@@ -7,7 +7,7 @@ import {
 
 export const authLogger = logger({ filename: "auth.log" });
 
-if (process.env.NODE_ENV !== "production") {
+if (process.env.NODE_ENV === "development") {
   authLogger.add(new transports.Console(consoleTransportStreamOptons("http")));
 }
 
