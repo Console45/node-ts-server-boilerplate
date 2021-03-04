@@ -1,7 +1,3 @@
-import {
-  resetPasswordParamSchema,
-  resetPasswordSchema,
-} from "./../validators/schema/auth";
 import { ValidationFields } from "./../constants/constant";
 import { Request, Response, NextFunction } from "express";
 import { controller, post, use, validate } from "../decorators";
@@ -12,6 +8,8 @@ import {
   loginSchema,
   googleLoginSchema,
   forgotPasswordSchema,
+  resetPasswordParamSchema,
+  resetPasswordSchema,
 } from "../validators/schema";
 import { auth } from "../middlewares/auth";
 
