@@ -9,11 +9,12 @@ import { connectDatabase } from "./database/database-config";
 import { apiErrorHandler } from "./utils/api-error";
 import { AppRouter } from "./utils/app-router";
 import { passRes, shouldCompress } from "./utils/app-utils";
-import "./controllers/root.controller";
-import "./controllers/auth.conroller";
 import morgan from "morgan";
 import { stream } from "./utils/loggers";
 import "./utils/run-error";
+import "./controllers/root.controller";
+import "./controllers/auth.conroller";
+import "./controllers/user.controller";
 
 const app: Application = express();
 
