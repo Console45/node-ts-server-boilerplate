@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import User from "../../../database/models/User";
 import supertest, { SuperTest, Test } from "supertest";
 import app from "../../../app";
@@ -8,7 +9,7 @@ const request: SuperTest<Test> = supertest(app);
 const refreshTokenUrl = "/auth/refresh_token";
 
 describe(refreshTokenUrl, () => {
-  const userId = "test-user id";
+  const userId = new mongoose.Types.ObjectId();
   const refreshToken = sign(
     { userId: userId, tokenVersion: 0 },
     keys.JWT_REFRESH_TOKEN_SECRET
