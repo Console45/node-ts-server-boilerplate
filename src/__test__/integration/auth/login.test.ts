@@ -22,10 +22,9 @@ describe(loginUrl, () => {
   };
   beforeEach(async () => {
     await User.deleteMany({});
-    await new User(testAdminOne).save();
-    await new User(testUserOne).save();
   });
   test(`POST ${loginUserUrl}`, async () => {
+    await new User(testUserOne).save();
     const response = await request
       .post(loginUserUrl)
       .send({ email: testUserOne.email, password: testAdminOne.password });
@@ -34,6 +33,7 @@ describe(loginUrl, () => {
     expect(response.body).toHaveProperty("status", "success");
   });
   test(`POST ${loginAdminUrl}`, async () => {
+    await new User(testAdminOne).save();
     const response = await request
       .post(loginAdminUrl)
       .send({ email: testAdminOne.email, password: testAdminOne.password });
@@ -43,6 +43,7 @@ describe(loginUrl, () => {
     expect(response.body).toHaveProperty("status", "success");
   });
   it(`Should return 401 on user login with POST ${loginAdminUrl}`, async () => {
+    await new User(testUserOne).save();
     const response = await request
       .post(loginAdminUrl)
       .send({ email: testUserOne.email, password: testAdminOne.password });
@@ -51,6 +52,7 @@ describe(loginUrl, () => {
     expect(response.body).toHaveProperty("message", "Access denied");
   });
   it(`Should return 404 on non existing email with ${loginUserUrl}`, async () => {
+    await new User(testUserOne).save();
     const response = await request
       .post(loginUserUrl)
       .send({ email: "randomemail@email.com", password: testUserOne.password });
@@ -59,6 +61,7 @@ describe(loginUrl, () => {
     expect(response.body).toHaveProperty("message", "Account doesnt exist");
   });
   it(`Should return 401 on invalid password with ${loginUserUrl}`, async () => {
+    await new User(testUserOne).save();
     const response = await request.post(loginUserUrl).send({
       email: testUserOne.email,
       password: "randompassword",
