@@ -10,13 +10,14 @@ export const auth = async (
 ): Promise<void> => {
   try {
     if (!req.header("Authorization"))
-      throw new BadRequest("authorization header is required");
+      throw new BadRequest("Authorization header is required");
     const token: string = req.header("Authorization").replace("Bearer ", "");
     const user = await authServiceInstance.checkAuth(token);
     req.user = user;
     req.accessToken = token;
     next();
   } catch (err) {
-    next(new UnAuthorizedRequest("Not authenticated"));
+    if (err.message === "Authorization header is required") next(err);
+    else next(new UnAuthorizedRequest("Not authenticated"));
   }
 };

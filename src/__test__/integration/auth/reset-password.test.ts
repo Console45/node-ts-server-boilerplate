@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import User from "../../../database/models/User";
+import keys from "../../../constants/keys";
 import supertest, { SuperTest, Test } from "supertest";
 import app from "../../../app";
 import { sign } from "jsonwebtoken";
@@ -12,12 +13,12 @@ describe(resetPasswordUrl, () => {
   const userThreeId = new mongoose.Types.ObjectId();
   const resetPasswordToken = sign(
     { userId: userThreeId, tokenVersion: 0 },
-    process.env.RESET_PASSWORD_TOKEN_SECRET!
+    keys.RESET_PASSWORD_TOKEN_SECRET
   );
 
   const revokedToken = sign(
     { userId: userThreeId, tokenVersion: 1 },
-    process.env.RESET_PASSWORD_TOKEN_SECRET!
+    keys.RESET_PASSWORD_TOKEN_SECRET
   );
   const testUserThree = {
     _id: userThreeId,
